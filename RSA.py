@@ -1,6 +1,6 @@
 import random
-
-import random
+import os
+import sys
 def rabinMiller(num):
    s = num - 1
    t = 0
@@ -135,35 +135,60 @@ def dekripsi(d, N, cipher):
 
     return text
 
-def main():
-    print("RSA")
-
-    keysize = int(input("Masukkan keysize : "))
-
-    e, d, N = generateKeys(keysize) 
-
-    print(f"e :{e}")
-    print(f"d :{d}")
-    print(f"N :{N}")
-
-def maintest():
-    print("RSA")
-
-    keysize = int(input("Masukkan keysize : "))
-
-    e, d, N = generateKeys(keysize) 
-
-    text = "Hello World!!!"
-
-    enc = enkripsi(e, N, text)
-    dec = dekripsi(d, N, enc)
-
-    print(f"Text :{text}")
-    print(f"e :{e}")
-    print(f"d :{d}")
-    print(f"N :{N}")
-    print(f"enc :{enc}")
-    print(f"dec :{dec}")
-
-main()
+def dekripsihex(e, N, text):
+    cipher = ""
+    m = ""
+    
+    for c in text:
+        m += str(ord(c))
         
+        cipher = hex(pow(int(m), e, N)).replace("0x","")+" "
+    # print (hex(int(m)))
+    return cipher
+
+def enkripsihex(d, N, cipher):
+    text = ""
+    parts = cipher.split()
+    for part in parts:
+        if part:
+            c = int(part,16)
+            text += hex(pow(c, d, N))
+    # print (f"c : {c}")
+    return text
+
+def writeKey(filename):
+    keySize = 1024
+    e, d, N = generateKeys(keySize) 
+    if os.path.exists('%s.pub' % (filename)) or os.path.exists('%s.pri' % (filename)):
+        sys.exit('WARNING: The file %s.pub or %s,.pri already exists! Use a different name or delete these files and re-run this program.' % (filename, filename))
+
+    fo = open('%s.pub' % (filename), 'w')
+    fo.write('%s,%s,%s' % (keySize, N, e))
+    fo.close()
+
+    fo = open('%s.pri' % (filename), 'w')
+    fo.write('%s,%s,%s' % (keySize, N, d))
+    fo.close()
+    
+
+# def maintest():
+#     print("RSA")
+
+#     keysize = int(input("Masukkan keysize : "))
+
+#     e, d, N = generateKeys(keysize) 
+
+#     text = "absjv12345"
+
+#     enc = dekripsihex(e, N, text)
+#     print(f"Text :{text}")
+#     print(f"e :{e}")
+#     print(f"d :{d}")
+#     print(f"N :{N}")
+#     print(f"enc :{enc}")
+#     dec = enkripsihex(d, N, enc)
+
+#     print(f"dec :{dec}")
+
+# maintest()
+
