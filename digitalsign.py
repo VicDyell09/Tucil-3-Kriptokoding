@@ -1,4 +1,3 @@
-import sys
 import hashlib
 import filereader
 import RSA
@@ -6,11 +5,13 @@ import RSA
 
 def hashText(text):
     hash = hashlib.new("sha3_224", text.encode())
-    # print("\nSHA3-512 Hash: ", hash_sha3_512.hexdigest())
     return hash.hexdigest()
 
 def generateDigitalSigned(filename, privatekey):
-    text = filereader.readfile(filename)
+    if filereader.fileext(filename) == ".txt":
+        text = filereader.readfile(filename) 
+    else:
+        text = filereader.readfilebin(filename)
     digest = hashText(text)
     key = filereader.readkey(privatekey)
     d = int(key[2])
@@ -23,20 +24,20 @@ def generateDigitalSigned(filename, privatekey):
         filereader.writefile(new_signature,filename)
 
 def validateDigitalSigned(filename, publickey, filesig=""):
-    text = filereader.readfile(filename)
-    isi = text.split("\n---Begin of Digital Signature---\n")
-    digest = hashText(isi[0])
     key = filereader.readkey(publickey)
     e = int(key[2])
     N = int(key[1])
     if filereader.fileext(filename) == ".txt":
-        isi = text.split("---Begin of Digital Signature---\n")
-        plaintext = isi[1].split("\n---End of Digital Signature---")
-        signature = plaintext[0] 
+        text = filereader.readfile(filename)
+        isi = text.split("\n---Begin of Digital Signature---\n")
+        digest = hashText(isi[0])
+        isisig = text.split("---Begin of Digital Signature---\n")
     else:
-        isi = filereader.readfile(filesig).split("---Begin of Digital Signature---\n")
-        plaintext = isi[1].split("\n---End of Digital Signature---")
-        signature = RSA.dekripsi(e, N, plaintext[0]) 
+        text = filereader.readfilebin(filename)
+        digest = hashText(text)
+        isisig = filereader.readfile(filesig).split("---Begin of Digital Signature---\n")
+    plaintext = isisig[1].split("\n---End of Digital Signature---")
+    signature = plaintext[0]
     signatureDigest = RSA.enkripsihex(e,N,signature)
     digests = ""
     for c in digest: 
@@ -48,5 +49,8 @@ def validateDigitalSigned(filename, publickey, filesig=""):
         print("Tidak Valid")
 
 
-# generateDigitalSigned("test.txt", "del.pri")
-validateDigitalSigned("test.txt","del.pub")
+# generateDigitalSigned("dea.docx", "del.pri")
+# validateDigitalSigned("dea.docx","del.pub","dea.txt")
+
+# generateDigitalSigned("aed.txt", "del.pri")
+validateDigitalSigned("aed.txt","del.pub")

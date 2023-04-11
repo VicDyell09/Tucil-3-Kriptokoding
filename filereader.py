@@ -10,7 +10,21 @@ def readkey(filename):
 def readfile(filename):
     with open(filename, "r") as f:
         text = f.read()
-    return(text)          
+    return(text)         
+
+# fungsi read file in bytes
+def readfilebin(filename):
+    bytes=[]
+    with open(filename, "rb") as f:
+        while True:
+            b = f.read(1)
+            if not b:
+                break
+            bytes.append(int.from_bytes(b, byteorder="big"))
+    text =""
+    for i in range(len(bytes)):
+        text+=chr(bytes[i])
+    return(text) 
 
 #funsi write file txt
 def writefile(text,filename):
