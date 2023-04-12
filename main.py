@@ -202,11 +202,14 @@ class Ui_MainWindow(object):
     def gensign(self):
         filename = self.plainTextEdit_2.toPlainText()
         privatekey = self.plainTextEdit_3.toPlainText()
-        if self.prikeychecker(privatekey)==True:
-            generateDigitalSigned(filename, privatekey)
-            self.popupnotifbiasa("File berhasil ditandatangani")
-        else:
-            self.popupnotiferror("Masukkan kunci private (dengan file .pri)!")
+        if filename == "" or privatekey == "":
+            self.popupnotiferror("File dan private key tidak boleh kosong!")
+        else:    
+            if self.prikeychecker(privatekey)==True:
+                generateDigitalSigned(filename, privatekey)
+                self.popupnotifbiasa("File berhasil ditandatangani")
+            else:
+                self.popupnotiferror("Masukkan kunci private (dengan file .pri)!")
 
     def browsefile(self):
         link = self.clicker()
