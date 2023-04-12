@@ -44,13 +44,13 @@ def validateDigitalSigned(filename, publickey, filesig=""):
         digests += str(ord(c))
     hexdigest = hex(int(digests))
     if hexdigest == signatureDigest:
-        print("Valid")
+        return("Valid")
     else:
-        print("Tidak Valid")
+        return("Tidak Valid")
 
 
 # generateDigitalSigned("dea.docx", "del.pri")
 # validateDigitalSigned("dea.docx","del.pub","dea.txt")
 
 # generateDigitalSigned("aed.txt", "del.pri")
-validateDigitalSigned("aed.txt","del.pub")
+# validateDigitalSigned("aed.txt","del.pub")

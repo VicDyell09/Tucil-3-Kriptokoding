@@ -9,7 +9,10 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-
+from PyQt5.QtWidgets import QFileDialog, QMessageBox
+from digitalsign import *
+from RSA import *
+from filereader import *
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -26,7 +29,7 @@ class Ui_MainWindow(object):
         self.generate = QtWidgets.QWidget()
         self.generate.setObjectName("generate")
         self.plainTextEdit = QtWidgets.QPlainTextEdit(self.generate)
-        self.plainTextEdit.setGeometry(QtCore.QRect(235, 120, 301, 41))
+        self.plainTextEdit.setGeometry(QtCore.QRect(235, 125, 301, 31))
         self.plainTextEdit.setObjectName("plainTextEdit")
         self.label_2 = QtWidgets.QLabel(self.generate)
         self.label_2.setGeometry(QtCore.QRect(75, 130, 150, 20))
@@ -147,6 +150,15 @@ class Ui_MainWindow(object):
         self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
+        self.pushButton.clicked.connect(self.genkey)
+        self.pushButton_2.clicked.connect(self.gensign)
+        self.pushButton_3.clicked.connect(self.signverif)
+        self.pushButton_4.clicked.connect(self.browsefile)
+        self.pushButton_5.clicked.connect(self.browseprivate)
+        self.pushButton_7.clicked.connect(self.browsefileverif)
+        self.pushButton_6.clicked.connect(self.browsepubkey)
+        self.pushButton_8.clicked.connect(self.browsesign)
+
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
@@ -173,6 +185,119 @@ class Ui_MainWindow(object):
         self.label_11.setText(_translate("MainWindow", "*jika file input berupa .txt kosongkan file sign"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.validate), _translate("MainWindow", "Validate"))
 
+    def clicker(self):
+        fname = QFileDialog.getOpenFileName(
+            parent = MainWindow, 
+            caption = "Open File",
+            directory = "", 
+            filter = "All Files (*)")
+        if fname:
+            return fname[0]
+    
+    def genkey(self):
+        filename = self.plainTextEdit.toPlainText()
+        writeKey(filename)
+        self.popupnotifbiasa("Kunci telah berhasil dibuat")
+
+    def gensign(self):
+        filename = self.plainTextEdit_2.toPlainText()
+        privatekey = self.plainTextEdit_3.toPlainText()
+        if self.prikeychecker(privatekey)==True:
+            generateDigitalSigned(filename, privatekey)
+            self.popupnotifbiasa("File berhasil ditandatangani")
+        else:
+            self.popupnotiferror("Masukkan kunci private (dengan file .pri)!")
+
+    def browsefile(self):
+        link = self.clicker()
+        self.plainTextEdit_2.setPlainText(link)    
+
+    def browseprivate(self):
+        link = self.clicker()
+        self.plainTextEdit_3.setPlainText(link)    
+
+    def browsefileverif(self):
+        link = self.clicker()
+        self.plainTextEdit_5.setPlainText(link)
+
+    def browsepubkey(self):
+        link = self.clicker()
+        self.plainTextEdit_4.setPlainText(link)    
+
+    def browsesign(self):
+        link = self.clicker()
+        self.plainTextEdit_6.setPlainText(link)    
+
+    def signverif(self):
+        filename = self.plainTextEdit_5.toPlainText()
+        filekey = self.plainTextEdit_4.toPlainText()
+        filesign = self.plainTextEdit_6.toPlainText()
+        
+        if filename=="" or filekey=="":
+            self.popupnotiferror("File name dan file key tidak boleh kosong!")
+
+        else:
+            if filereader.fileext(filename) == ".txt":
+                if filesign != "":
+                    self.popupnotiferror("Kosongkan file sign! \n.txt tidak perlu filesign")
+                else:
+                    if self.pubkeychecker(filekey) == True:
+                        hasil = validateDigitalSigned(filename, filekey, filesign)
+                        if hasil == "Valid":
+                            self.popupnotifbiasa("File asli dan berhasil diverifikasi")
+                        elif hasil == "Tidak Valid":
+                            self.popupnotifwarning("Verifikasi gagal! \n File asli sudah berubah atau Anda salah memasukkan kunci")
+                    else:
+                        self.popupnotiferror("Masukkan kunci publik (dengan file .pub)!")
+
+            else:
+                if filesign == "":
+                    self.popupnotiferror("Masukkan file sign!")
+                else:
+                    if self.pubkeychecker(filekey) == True:
+                        hasil = validateDigitalSigned(filename, filekey, filesign)
+                        if hasil == "Valid":
+                            self.popupnotifbiasa("File asli dan berhasil diverifikasi")
+                        elif hasil == "Tidak Valid":
+                            self.popupnotifwarning("Verifikasi gagal! \n File asli sudah berubah atau Anda salah memasukkan kunci")
+                    else:
+                        self.popupnotiferror("Masukkan kunci publik (dengan file .pub)!")
+
+    def popupnotifbiasa(self, kalimat):
+        msg = QMessageBox()
+        msg.setWindowTitle("Digital Signature")
+        msg.setText(kalimat)
+        msg.setIcon(QMessageBox.Information)
+
+        x = msg.exec_()
+
+    def popupnotifwarning(self, kalimat):
+        msg = QMessageBox()
+        msg.setWindowTitle("Digital Signature")
+        msg.setText(kalimat)
+        msg.setIcon(QMessageBox.Warning)
+
+        x = msg.exec_()
+
+    def popupnotiferror(self, kalimat):
+        msg = QMessageBox()
+        msg.setWindowTitle("Digital Signature")
+        msg.setText(kalimat)
+        msg.setIcon(QMessageBox.Critical)
+
+        x = msg.exec_()    
+
+    def pubkeychecker(self, file):
+        if filereader.fileext(file) == ".pub":
+            return True
+        else:
+            return False
+
+    def prikeychecker(self, file):
+        if filereader.fileext(file) == ".pri":
+            return True
+        else:
+            return False
 
 if __name__ == "__main__":
     import sys
@@ -182,3 +307,7 @@ if __name__ == "__main__":
     ui.setupUi(MainWindow)
     MainWindow.show()
     sys.exit(app.exec_())
+
+    '''
+QmessageBox.Ok
+    '''

@@ -52,8 +52,8 @@ def generateKeys(keysize=1024):
     p = generateLargePrime(keysize)
     q = generateLargePrime(keysize)
 
-    print("p :", p)
-    print("q :", q)
+    # print("p :", p)
+    # print("q :", q)
 
     N = p*q
     phiN = (p - 1) * (q - 1)
