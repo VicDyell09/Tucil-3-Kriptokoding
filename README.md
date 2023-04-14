@@ -21,4 +21,5 @@ git clone https://github.com/VicDyell09/Tucil-3-KriptoKoding.git
 - Jalankan main.exe
 - Tunggu sesaat sampai program berhasil dieksekusi
 - Program siap digunakan
-*catatan file yang dihasilkan akan berada di dalam folder main.exe tersebut
+
+### *catatan file yang dihasilkan akan berada di dalam folder main.exe tersebut
